@@ -1,30 +1,36 @@
-'use strict';
+"use strict";
 
-var _ = require('lodash');
-var assert = require('assert');
-var EventEmitter = require('events');
+var _ = require("lodash");
+var assert = require("assert");
+var EventEmitter = require("events");
 
-var bitBuffer = require('./ext/bitbuffer');
+var bitBuffer = require("./ext/bitbuffer");
 
-var net = require('./net');
-var consts = require('./consts');
-var functional = require('./functional');
-var props = require('./props');
+var net = require("./net");
+var consts = require("./consts");
+var functional = require("./functional");
+var props = require("./props");
 
-var BaseEntity = require('./entities/baseentity.js');
-var GameRules = require('./entities/gamerules.js');
-var Player = require('./entities/player.js');
-var Team = require('./entities/team.js');
-var Weapon = require('./entities/weapon.js');
+var BaseEntity = require("./entities/baseentity.js");
+var GameRules = require("./entities/gamerules.js");
+var Player = require("./entities/player.js");
+var Team = require("./entities/team.js");
+var Weapon = require("./entities/weapon.js");
 
 const MAX_EDICT_BITS = 11;
 const NETWORKED_EHANDLE_ENT_ENTRY_MASK = (1 << MAX_EDICT_BITS) - 1;
 const NUM_NETWORKED_EHANDLE_SERIAL_NUMBER_BITS = 10;
-const NUM_NETWORKED_EHANDLE_BITS = MAX_EDICT_BITS + NUM_NETWORKED_EHANDLE_SERIAL_NUMBER_BITS;
+const NUM_NETWORKED_EHANDLE_BITS =
+  MAX_EDICT_BITS + NUM_NETWORKED_EHANDLE_SERIAL_NUMBER_BITS;
 const INVALID_NETWORKED_EHANDLE_VALUE = (1 << NUM_NETWORKED_EHANDLE_BITS) - 1;
 
 function isPropExcluded(excludes, table, prop) {
-  return _.find(excludes, excluded => table.netTableName === excluded.dtName && prop.varName === excluded.varName);
+  return _.find(
+    excludes,
+    excluded =>
+      table.netTableName === excluded.dtName &&
+      prop.varName === excluded.varName
+  );
 }
 
 function readFieldIndex(entityBitBuffer, lastIndex, newWay) {
@@ -39,23 +45,24 @@ function readFieldIndex(entityBitBuffer, lastIndex, newWay) {
   } else {
     ret = entityBitBuffer.readUBits(7);
 
-    switch (ret & ( 32 | 64 )) {
+    switch (ret & (32 | 64)) {
       case 32:
-        ret = ( ret & ~96 ) | ( entityBitBuffer.readUBits(2) << 5 );
+        ret = (ret & ~96) | (entityBitBuffer.readUBits(2) << 5);
         assert(ret >= 32);
         break;
       case 64:
-        ret = ( ret & ~96 ) | ( entityBitBuffer.readUBits(4) << 5 );
+        ret = (ret & ~96) | (entityBitBuffer.readUBits(4) << 5);
         assert(ret >= 128);
         break;
       case 96:
-        ret = ( ret & ~96 ) | ( entityBitBuffer.readUBits(7) << 5 );
+        ret = (ret & ~96) | (entityBitBuffer.readUBits(7) << 5);
         assert(ret >= 512);
         break;
     }
   }
 
-  if (ret === 0xFFF) { // end marker is 4095 for CS:GO
+  if (ret === 0xfff) {
+    // end marker is 4095 for CS:GO
     return -1;
   }
 
@@ -80,7 +87,7 @@ class Entities extends EventEmitter {
       DT_CSPlayer: Player,
       DT_Team: Team,
       DT_CSGameRules: GameRules,
-      DT_WeaponCSBase: Weapon,
+      DT_WeaponCSBase: Weapon
     };
 
     /**
@@ -92,8 +99,8 @@ class Entities extends EventEmitter {
 
   listen(demo) {
     this._demo = demo;
-    demo.on('svc_PacketEntities', this._handlePacketEntities.bind(this));
-    demo.stringTables.on('update', this._handleStringTableUpdate.bind(this));
+    demo.on("svc_PacketEntities", this._handlePacketEntities.bind(this));
+    demo.stringTables.on("update", this._handleStringTableUpdate.bind(this));
   }
 
   /**
@@ -117,7 +124,7 @@ class Entities extends EventEmitter {
     }
 
     let ent = this.entities[handle & NETWORKED_EHANDLE_ENT_ENTRY_MASK];
-    if (ent == null || ent.serialNum !== (handle >> MAX_EDICT_BITS)) {
+    if (ent == null || ent.serialNum !== handle >> MAX_EDICT_BITS) {
       return null;
     }
 
@@ -130,7 +137,7 @@ class Entities extends EventEmitter {
    * @returns {Player|null} Entity referenced by the user ID. `null` if no matching player.
    */
   getByUserId(userId) {
-    let userInfos = this._demo.stringTables.findTableByName('userinfo').entries;
+    let userInfos = this._demo.stringTables.findTableByName("userinfo").entries;
 
     for (let i = 0; i < userInfos.length; ++i) {
       let userEntry = userInfos[i];
@@ -172,7 +179,7 @@ class Entities extends EventEmitter {
   }
 
   get gameRules() {
-    return this.getSingleton('DT_CSGameRules');
+    return this.getSingleton("DT_CSGameRules");
   }
 
   get teams() {
@@ -210,7 +217,11 @@ class Entities extends EventEmitter {
     for (var index = 0; index < table.props.length; ++index) {
       var prop = table.props[index];
 
-      if ((prop.flags & props.SPROP_INSIDEARRAY) !== 0 || (prop.flags & props.SPROP_EXCLUDE) !== 0 || isPropExcluded(excludes, table, prop)) {
+      if (
+        (prop.flags & props.SPROP_INSIDEARRAY) !== 0 ||
+        (prop.flags & props.SPROP_EXCLUDE) !== 0 ||
+        isPropExcluded(excludes, table, prop)
+      ) {
         continue;
       }
 
@@ -234,12 +245,12 @@ class Entities extends EventEmitter {
           table
         });
       } else {
-        flattened.push({prop, table});
+        flattened.push({ prop, table });
       }
     }
 
     // collapsible props should come after non-collapsible
-    return _.sortBy(flattened, fp => fp.collapsible === false ? 0 : 1);
+    return _.sortBy(flattened, fp => (fp.collapsible === false ? 0 : 1));
   }
 
   _flattenDataTable(table) {
@@ -255,13 +266,21 @@ class Entities extends EventEmitter {
 
     // sort flattenedProps by priority
     for (var priority of priorities) {
-      while (true) { // eslint-disable-line no-constant-condition
+      while (true) {
+        // eslint-disable-line no-constant-condition
         let currentProp;
 
-        for (currentProp = start; currentProp < flattenedProps.length; ++currentProp) {
+        for (
+          currentProp = start;
+          currentProp < flattenedProps.length;
+          ++currentProp
+        ) {
           let prop = flattenedProps[currentProp].prop;
 
-          if (prop.priority === priority || (priority === 64 && (prop.flags & props.SPROP_CHANGES_OFTEN) !== 0)) {
+          if (
+            prop.priority === priority ||
+            (priority === 64 && (prop.flags & props.SPROP_CHANGES_OFTEN) !== 0)
+          ) {
             if (start !== currentProp) {
               let temp = flattenedProps[start];
               flattenedProps[start] = flattenedProps[currentProp];
@@ -283,7 +302,7 @@ class Entities extends EventEmitter {
   }
 
   _findTableByName(name) {
-    return _.find(this.dataTables, _.matchesProperty('netTableName', name));
+    return _.find(this.dataTables, _.matchesProperty("netTableName", name));
   }
 
   /**
@@ -302,11 +321,12 @@ class Entities extends EventEmitter {
    */
 
   _handleDataTables(chunk) {
-    var sendTable = net.findByName('svc_SendTable');
+    var sendTable = net.findByName("svc_SendTable");
 
-    while (true) { // eslint-disable-line no-constant-condition
+    while (true) {
+      // eslint-disable-line no-constant-condition
       var type = chunk.readVarint32();
-      assert.equal(type, sendTable.type, 'expected SendTable message');
+      assert.equal(type, sendTable.type, "expected SendTable message");
 
       var msg = sendTable.class.decode(chunk.readVBytes());
       if (msg.isEnd) {
@@ -322,13 +342,13 @@ class Entities extends EventEmitter {
 
     for (var i = 0; i < serverClasses; ++i) {
       var classId = chunk.readShort();
-      assert(classId === i, 'server class entry for invalid class ID');
+      assert(classId === i, "server class entry for invalid class ID");
 
       var name = chunk.readCString();
 
       var dtName = chunk.readCString();
       var dataTable = this._findTableByName(dtName);
-      assert(dataTable, 'no data table for server class');
+      assert(dataTable, "no data table for server class");
 
       var serverClass = {
         name,
@@ -342,15 +362,22 @@ class Entities extends EventEmitter {
       // parse any pending baseline
       var pendingBaseline = this.pendingBaselines[classId];
       if (pendingBaseline) {
-        this.instanceBaselines[classId] = this._parseInstanceBaseline(pendingBaseline, classId);
-        this.emit('baselineupdate', {classId, serverClass, baseline: this.instanceBaselines[classId]});
+        this.instanceBaselines[classId] = this._parseInstanceBaseline(
+          pendingBaseline,
+          classId
+        );
+        this.emit("baselineupdate", {
+          classId,
+          serverClass,
+          baseline: this.instanceBaselines[classId]
+        });
         delete this.pendingBaselines[classId];
       }
     }
 
     assert.equal(chunk.remaining(), 0);
 
-    this.emit('datatablesready');
+    this.emit("datatablesready");
   }
 
   /**
@@ -372,7 +399,9 @@ class Entities extends EventEmitter {
 
   _addEntity(index, classId, serialNum) {
     if (this.entities[index]) {
+      // console.log("adding entity");
       this._removeEntity(index);
+      // console.log("removed entity");
     }
 
     let baseline = this.instanceBaselines[classId];
@@ -389,10 +418,16 @@ class Entities extends EventEmitter {
       }
     }
 
-    var entity = new klass(this._demo, index, classId, serialNum, _.cloneDeep(baseline));
+    var entity = new klass(
+      this._demo,
+      index,
+      classId,
+      serialNum,
+      _.cloneDeep(baseline)
+    );
     this.entities[index] = entity;
 
-    this.emit('create', {entity});
+    this.emit("create", { entity });
 
     return entity;
   }
@@ -412,13 +447,18 @@ class Entities extends EventEmitter {
    */
 
   _removeEntity(index) {
-    assert(this.entities[index] !== undefined, 'cannot remove non-existent entity');
+    try {
+      assert(
+        this.entities[index] !== undefined,
+        "cannot remove non-existent entity"
+      );
+      this.emit("beforeremove", { entity: this.entities[index] });
+      this.entities[index] = undefined;
 
-    this.emit('beforeremove', {entity: this.entities[index]});
-
-    this.entities[index] = undefined;
-
-    this.emit('remove', {index});
+      this.emit("remove", { index });
+    } catch (e) {
+      assert("Shit broke: " + e.message);
+    }
   }
 
   /**
@@ -436,7 +476,11 @@ class Entities extends EventEmitter {
     var serverClass = this.serverClasses[classId];
 
     var newWay = entityBitBuffer.readOneBit() === 1;
-    var fieldIndices = functional.fillUntil(-1, lastIndex => readFieldIndex(entityBitBuffer, lastIndex, newWay), -1);
+    var fieldIndices = functional.fillUntil(
+      -1,
+      lastIndex => readFieldIndex(entityBitBuffer, lastIndex, newWay),
+      -1
+    );
 
     var updatedProps = [];
 
@@ -445,7 +489,7 @@ class Entities extends EventEmitter {
       assert(flattenedProp);
 
       var decoder = new props.PropDecoder(entityBitBuffer, flattenedProp);
-      updatedProps.push({prop: flattenedProp, value: decoder.decode()});
+      updatedProps.push({ prop: flattenedProp, value: decoder.decode() });
     }
 
     return updatedProps;
@@ -462,7 +506,7 @@ class Entities extends EventEmitter {
 
       entity.updateProp(tableName, varName, update.value);
 
-      this.emit('change', {
+      this.emit("change", {
         entity,
         tableName,
         varName,
@@ -473,33 +517,37 @@ class Entities extends EventEmitter {
   }
 
   _handlePacketEntities(msg) {
-    var entityBitBuffer = new bitBuffer.BitStream(msg.entityData.toSlicedBuffer());
+    var entityBitBuffer = new bitBuffer.BitStream(
+      msg.entityData.toSlicedBuffer()
+    );
 
     var entityIndex = -1;
 
     for (var i = 0; i < msg.updatedEntries; ++i) {
       entityIndex += 1 + entityBitBuffer.readUBitVar();
 
-      assert(entityIndex < this.entities.length, 'newEntity >= MAX_EDICTS');
+      assert(entityIndex < this.entities.length, "newEntity >= MAX_EDICTS");
 
       if (entityBitBuffer.readOneBit()) {
         if (entityBitBuffer.readOneBit()) {
-          assert(msg.isDelta, 'deleting entity on full update');
+          assert(msg.isDelta, "deleting entity on full update");
           this._removeEntity(entityIndex);
         } else {
-          assert(msg.isDelta, 'entity leaving PVS on full update');
+          assert(msg.isDelta, "entity leaving PVS on full update");
           // Maybe set a flag on the entity indicating that it is out of PVS?
         }
       } else if (entityBitBuffer.readOneBit()) {
         var classId = entityBitBuffer.readUBits(this.serverClassBits);
-        var serialNum = entityBitBuffer.readUBits(consts.NUM_NETWORKED_EHANDLE_SERIAL_NUMBER_BITS);
+        var serialNum = entityBitBuffer.readUBits(
+          consts.NUM_NETWORKED_EHANDLE_SERIAL_NUMBER_BITS
+        );
 
         let newEnt = this._addEntity(entityIndex, classId, serialNum);
         this._readNewEntity(entityBitBuffer, newEnt);
-        this.emit('postcreate', {entity: newEnt});
+        this.emit("postcreate", { entity: newEnt });
       } else {
         let entity = this.entities[entityIndex];
-        assert(entity, 'delta on deleted entity');
+        assert(entity, "delta on deleted entity");
         this._readNewEntity(entityBitBuffer, entity);
       }
     }
@@ -513,7 +561,7 @@ class Entities extends EventEmitter {
       var varName = bl.prop.prop.varName;
 
       if (classBaseline[tableName] === undefined) {
-        classBaseline[tableName] = {[varName]: bl.value};
+        classBaseline[tableName] = { [varName]: bl.value };
       } else {
         classBaseline[tableName][varName] = bl.value;
       }
@@ -523,7 +571,7 @@ class Entities extends EventEmitter {
   }
 
   _handleStringTableUpdate(event) {
-    if (event.table.name !== 'instancebaseline' || !event.userData) {
+    if (event.table.name !== "instancebaseline" || !event.userData) {
       return;
     }
 
@@ -535,8 +583,11 @@ class Entities extends EventEmitter {
       return;
     }
 
-    this.instanceBaselines[classId] = this._parseInstanceBaseline(baselineBuf, classId);
-    this.emit('baselineupdate', {
+    this.instanceBaselines[classId] = this._parseInstanceBaseline(
+      baselineBuf,
+      classId
+    );
+    this.emit("baselineupdate", {
       classId,
       serverClass: this.serverClasses[classId],
       baseline: this.instanceBaselines[classId]

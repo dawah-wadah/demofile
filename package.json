@@ -1,23 +1,58 @@
 {
-  "name": "demofile",
-  "version": "0.4.9",
-  "author": "Saul Rennison <saul.rennison@gmail.com>",
-  "license": "MIT",
-  "keywords": [
-    "demo",
-    "source",
-    "csgo"
+  "_args": [
+    [
+      {
+        "raw": "demofile",
+        "scope": null,
+        "escapedName": "demofile",
+        "name": "demofile",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/home/wadahadlan/Desktop/demo_reader"
+    ]
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/saul/demofile.git"
+  "_from": "demofile@latest",
+  "_id": "demofile@0.4.9",
+  "_inCache": true,
+  "_location": "/demofile",
+  "_nodeVersion": "7.10.0",
+  "_npmOperationalInternal": {
+    "host": "packages-18-east.internal.npmjs.com",
+    "tmp": "tmp/demofile-0.4.9.tgz_1494435927263_0.9935763143002987"
   },
-  "scripts": {
-    "lint": "eslint .",
-    "generate-docs": "jsdoc -c .jsdoc.json --verbose .",
-    "bundle": "browserify browser/app.js -d -o browser/bundle.js -t brfs"
+  "_npmUser": {
+    "name": "saulren",
+    "email": "saul.rennison@gmail.com"
   },
-  "main": "demo.js",
+  "_npmVersion": "4.2.0",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "demofile",
+    "scope": null,
+    "escapedName": "demofile",
+    "name": "demofile",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/demofile/-/demofile-0.4.9.tgz",
+  "_shasum": "d612019d9feeebc198384bbbbdd7a7dba38e9b4d",
+  "_shrinkwrap": null,
+  "_spec": "demofile",
+  "_where": "/home/wadahadlan/Desktop/demo_reader",
+  "author": {
+    "name": "Saul Rennison",
+    "email": "saul.rennison@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/saul/demofile/issues"
+  },
   "dependencies": {
     "async": "^1.5.0",
     "binary-parser": "^1.1.5",
@@ -32,7 +67,41 @@
     "protobufjs": "^4.1.3",
     "varint": "^4.0.0"
   },
+  "description": "[![Join the chat at https://gitter.im/saul/demofile](https://badges.gitter.im/saul/demofile.svg)](https://gitter.im/saul/demofile?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)",
   "devDependencies": {
     "minami": "^1.1.1"
-  }
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "d612019d9feeebc198384bbbbdd7a7dba38e9b4d",
+    "tarball": "https://registry.npmjs.org/demofile/-/demofile-0.4.9.tgz"
+  },
+  "gitHead": "73ee9fad0bcff2d6d6328fe1ebdcedca1af6a252",
+  "homepage": "https://github.com/saul/demofile#readme",
+  "keywords": [
+    "demo",
+    "source",
+    "csgo"
+  ],
+  "license": "MIT",
+  "main": "demo.js",
+  "maintainers": [
+    {
+      "name": "saulren",
+      "email": "saul.rennison@gmail.com"
+    }
+  ],
+  "name": "demofile",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saul/demofile.git"
+  },
+  "scripts": {
+    "bundle": "browserify browser/app.js -d -o browser/bundle.js -t brfs",
+    "generate-docs": "jsdoc -c .jsdoc.json --verbose .",
+    "lint": "eslint ."
+  },
+  "version": "0.4.9"
 }

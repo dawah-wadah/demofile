@@ -22,14 +22,14 @@ function parseDemoFile(path) {
     });
 
     demoFile.conVars.on('change', e => {
-      console.log('%s: %s -> %s', e.name, e.oldValue, e.value);
+      //console.log('%s: %s -> %s', e.name, e.oldValue, e.value);
     });
 
     demoFile.gameEvents.on('player_death', e => {
       let victim = demoFile.entities.getByUserId(e.userid);
       let attacker = demoFile.entities.getByUserId(e.attacker);
       if (victim && attacker) {
-        console.log('%s killed %s with %s (attacker has %d hp remaining)', attacker.name, victim.name, e.weapon, attacker.health);
+        //console.log('%s killed %s with %s (attacker has %d hp remaining)', attacker.name, victim.name, e.weapon, attacker.health);
       }
     });
 
@@ -37,7 +37,21 @@ function parseDemoFile(path) {
       let teams = demoFile.teams;
       let terrorists = teams[demo.TEAM_TERRORISTS];
       let cts = teams[demo.TEAM_CTS];
-      console.log('*** Round ended \'%s\' (reason: %s)\n\tTerrorists: %s score %d\n\tCTs: %s score %d', demoFile.gameRules.phase, e.reason, terrorists.clanName, terrorists.score, cts.clanName, cts.score);
+      //console.log('*** Round ended \'%s\' (reason: %s)\n\tTerrorists: %s score %d\n\tCTs: %s score %d', demoFile.gameRules.phase, e.reason, terrorists.clanName, terrorists.score, cts.clanName, cts.score);
+    });
+
+    let tickInterval = 0;
+
+    demoFile.on('svc_ServerInfo', info => {
+      tickInterval = info.tickInterval;
+    });
+
+    demoFile.on('tickstart', tick => {
+      if (tick % 1000 != 0)
+        return;
+
+      console.log('tick (time):', demoFile.currentTime);
+      console.log('tick (actl):', tick * tickInterval);
     });
 
     demoFile.entities.on('create', e => {
