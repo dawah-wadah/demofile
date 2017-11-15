@@ -47,7 +47,7 @@ class BaseEntity {
 
   updateProp(tableName, varName, newValue) {
     if (this.props[tableName] === undefined) {
-      this.props[tableName] = {[varName]: newValue};
+      this.props[tableName] = { [varName]: newValue };
     } else {
       this.props[tableName][varName] = newValue;
     }
@@ -73,7 +73,9 @@ class BaseEntity {
    * @returns {Entity|null} Owning entity, if it exists
    */
   get owner() {
-    return this._demo.entities.getByHandle(this.getProp('DT_BaseEntity', 'm_hOwnerEntity'));
+    return this._demo.entities.getByHandle(
+      this.getProp('DT_BaseEntity', 'm_hOwnerEntity')
+    );
   }
 
   /**
@@ -81,6 +83,18 @@ class BaseEntity {
    */
   get teamNumber() {
     return this.getProp('DT_BaseEntity', 'm_iTeamNum');
+  }
+
+  /**
+  * @returns {Side} Side if assigned, null if unassigned.
+  */
+  get side() {
+    let teamNum = this.teamNumber;
+    if (teamNum !== 0 || teamNum !== 1) {
+      return teamNum === 2 ? 'Terrorist' : 'Counter-Terrorist';
+    } else {
+      return 'Not Assigned';
+    }
   }
 
   /**
