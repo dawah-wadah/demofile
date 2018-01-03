@@ -295,8 +295,8 @@ class StringTables extends EventEmitter {
       "table already exists"
     );
 
-    assert(msg.userDataSize === Math.ceil(msg.table.userDataSizeBits / 8), 'invalid user data byte size');
-    assert(msg.table.userDataSizeBits <= 32, 'userdata value too large');
+    assert(msg.userDataSize === Math.ceil(msg.userDataSizeBits / 8), 'invalid user data byte size');
+    assert(msg.userDataSizeBits <= 32, 'userdata value too large');
 
     // create an empty table
     var table = {
@@ -304,7 +304,7 @@ class StringTables extends EventEmitter {
       entries: _.map(_.range(msg.maxEntries), function () {
         return {entry: null, userData: null};
       }),
-      table.userDataSizeBits: msg.table.userDataSizeBits,
+      userDataSizeBits: msg.userDataSizeBits,
       userDataFixedSize: msg.userDataFixedSize
     };
 
