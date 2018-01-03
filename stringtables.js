@@ -175,19 +175,7 @@ class StringTables extends EventEmitter {
    * @property {*|undefined} userData - New user data
    */
 
-<<<<<<< HEAD
-  _parseStringTableUpdate(
-    bitbuf,
-    table,
-    entries,
-    maxEntries,
-    userDataSize,
-    userDataSizeBits,
-    userDataFixedSize
-  ) {
-=======
   _parseStringTableUpdate(bitbuf, table, entries, maxEntries) {
->>>>>>> 476a7efb7eb857f20c66b05c6efded15a60879ad
     // overflow silently. this is how the official parser handles overflows...
     bitbuf.view.silentOverflow = true;
 
