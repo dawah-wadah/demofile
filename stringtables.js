@@ -231,14 +231,14 @@ class StringTables extends EventEmitter {
 
         if (bitbuf.readOneBit()) {
           // don't read the length, it's fixed length and the length was networked down already
-          if (userDataFixedSize) {
+          if (table.userDataFixedSize) {
             assert(
-              userDataSize === Math.ceil(userDataSizeBits / 8),
+              userDataSize === Math.ceil(table.userDataSizeBits / 8),
               "invalid user data byte size"
             );
-            assert(userDataSizeBits <= 32, "userdata value too large");
+            assert(table.userDataSizeBits <= 32, "userdata value too large");
 
-            userDataArray = [bitbuf.readUBits(userDataSizeBits)];
+            userDataArray = [bitbuf.readUBits(table.userDataSizeBits)];
           } else {
             var bytes = bitbuf.readUBits(consts.MAX_USERDATA_BITS);
             userDataArray = bitbuf.readBytes(bytes);
@@ -295,8 +295,8 @@ class StringTables extends EventEmitter {
       "table already exists"
     );
 
-    assert(msg.userDataSize === Math.ceil(msg.userDataSizeBits / 8), 'invalid user data byte size');
-    assert(msg.userDataSizeBits <= 32, 'userdata value too large');
+    assert(msg.userDataSize === Math.ceil(msg.table.userDataSizeBits / 8), 'invalid user data byte size');
+    assert(msg.table.userDataSizeBits <= 32, 'userdata value too large');
 
     // create an empty table
     var table = {
@@ -304,7 +304,7 @@ class StringTables extends EventEmitter {
       entries: _.map(_.range(msg.maxEntries), function () {
         return {entry: null, userData: null};
       }),
-      userDataSizeBits: msg.userDataSizeBits,
+      table.userDataSizeBits: msg.table.userDataSizeBits,
       userDataFixedSize: msg.userDataFixedSize
     };
 
